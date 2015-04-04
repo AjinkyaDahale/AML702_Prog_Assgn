@@ -42,6 +42,7 @@ class Signals:
 # Gets all the objects of interest: windows, list boxes, graphviews etc
 builder = Gtk.Builder()
 builder.add_objects_from_file('gui/igl-app-window.glade', ('window1', '') )
+builder.add_objects_from_file('gui/igl-app-window.glade', ('titlebox', '') )
 builder.connect_signals(Signals())
 
 myfirstwindow = builder.get_object('window1')
@@ -51,6 +52,14 @@ sw2 = builder.get_object('graphtools')
 gtbrevealer = builder.get_object('graphtoolsrevealer')
 m1revealer = builder.get_object('method1revealer')
 m2revealer = builder.get_object('method2revealer')
+
+# Use Headerbar for inputs
+
+hb = Gtk.HeaderBar()
+hb.set_show_close_button(True)
+hb.set_custom_title(builder.get_object('titlebox'))
+
+myfirstwindow.set_titlebar(hb)
 
 # TODO: Replace all this mess by code for exact solution and the 2 methods to compare.
 
