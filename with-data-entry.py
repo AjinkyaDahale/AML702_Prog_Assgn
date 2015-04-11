@@ -59,6 +59,8 @@ class MainClass():
         self.liststore.append([2.35, 2.40])
         self.liststore.append([3.45, 4.70])
 
+        self.plotpoints()
+
     def resetplot(self):
         self.ax.cla()
         self.ax.set_xlim(0,10)
@@ -91,8 +93,6 @@ class MainClass():
         self.plotpoints()
 
 mc = MainClass()
-mc.resetplot()
-mc.plotpoints()
 
 mc.window.connect("delete-event", Gtk.main_quit)
 mc.window.show_all()

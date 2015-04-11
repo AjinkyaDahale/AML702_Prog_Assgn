@@ -3,7 +3,7 @@
 from gi.repository import Gtk
 
 from matplotlib.figure import Figure
-from numpy import sin, cos, pi, linspace, log
+from numpy import sin, cos, pi, linspace, log, exp, floor
 #Possibly this rendering backend is broken currently
 #from matplotlib.backends.backend_gtk3agg import FigureCanvasGTK3Agg as FigureCanvas
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
@@ -19,13 +19,13 @@ class Signals:
         self.toggle_m2reveal(widget)
         self.toggle_gtbreveal(widget)
 
+    # TODO make these change as per the toggle, rather than simply toggling
+
     def toggle_gtbreveal(self, widget):
         if gtbrevealer.get_reveal_child():
             gtbrevealer.set_reveal_child(False)
         else:
             gtbrevealer.set_reveal_child(True)
-
-    # TODO make these change as per the toggle, rather than simply toggling
 
     def toggle_m1reveal(self, widget):
         if m1revealer.get_reveal_child():
@@ -39,10 +39,34 @@ class Signals:
         else:
             m2revealer.set_reveal_child(True)
 
+    def resetplot(self):
+        ax.cla()
+        ax.grid(True)
+
+    def plotexact(self):
+        self.resetplot()
+        n = 1000
+        xs = linspace(a, b, n, endpoint=True)
+        fxs = f(xs)
+        fxexact = ax.plot(xs, fxs, color='black', label='f(x)')
+
+    def on_params_changed(self, widget):
+        global f,a,b
+        # print 'Integrand changed'
+        try:
+            f = eval('lambda x: '+fnbox.get_active_text())
+            a = eval(aentry.get_text())
+            b = eval(bentry.get_text())
+            self.plotexact()
+            canvas.draw()
+        except:
+            pass
+
+        
 # Gets all the objects of interest: windows, list boxes, graphviews etc
 builder = Gtk.Builder()
-builder.add_objects_from_file('gui/igl-app-window.glade', ('window1', '') )
-builder.add_objects_from_file('gui/igl-app-window.glade', ('titlebox', '') )
+builder.add_from_file('gui/igl-app-window.glade')
+# builder.add_objects_from_file('gui/igl-app-window.glade', ('titlebox', '') )
 builder.connect_signals(Signals())
 
 myfirstwindow = builder.get_object('window1')
@@ -52,6 +76,10 @@ sw2 = builder.get_object('graphtools')
 gtbrevealer = builder.get_object('graphtoolsrevealer')
 m1revealer = builder.get_object('method1revealer')
 m2revealer = builder.get_object('method2revealer')
+
+fnbox = builder.get_object('functioncbtext')
+aentry = builder.get_object('aentry')
+bentry = builder.get_object('bentry')
 
 # Use Headerbar for inputs
 
@@ -66,10 +94,10 @@ myfirstwindow.set_titlebar(hb)
 fig = Figure(figsize=(5,5), dpi=80)
 ax = fig.add_subplot(111)
 
-f = lambda x: sin(14+x)
+f = lambda x: sin(x); a,b = -pi,pi
 
 n = 1000
-xs = linspace(-pi, pi, n, endpoint=True)
+xs = linspace(a, b, n, endpoint=True)
 # xcos = linspace(-pi, pi, n, endpoint=True)
 fxs = f(xs)
 # ycos = cos(xcos)
@@ -77,7 +105,7 @@ fxs = f(xs)
 fxexact = ax.plot(xs, fxs, color='black', label='f(x)')
 m1approx = ax.plot(xs[::100], fxs[::100], color='black', label='Approx 1', linestyle='--')
 
-ax.set_xlim(-pi,pi)
+ax.set_xlim(a,b)
 ax.set_ylim(min(fxs),max(fxs))
 
 # ax.fill_between(xs, 0, fxs, (fxs - 1) > -1, color='blue', alpha=.3)
