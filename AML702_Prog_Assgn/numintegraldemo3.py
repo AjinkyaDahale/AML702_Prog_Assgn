@@ -3,21 +3,23 @@
 from gi.repository import Gtk
 
 from matplotlib.figure import Figure
-from numpy import sin, cos, pi, linspace, log, exp, floor
+from numpy import sin, cos, pi, linspace, log, exp, floor, piecewise
 #Possibly this rendering backend is broken currently
 #from matplotlib.backends.backend_gtk3agg import FigureCanvasGTK3Agg as FigureCanvas
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
 from matplotlib.backends.backend_gtk3 import NavigationToolbar2GTK3 as NavigationToolbar
 
+from guisetup import MethodDetailsBox
+
 class MainClass():
     def __init__(self):
         # Gets all the objects of interest: windows, list boxes, graphviews etc
         self.builder = Gtk.Builder()
-        self.builder.add_from_file('gui/igl-app-window.glade')
+        self.builder.add_from_file('gui/igl-app-window-2.glade')
         self.builder.connect_signals(self)
 
         self.window = self.builder.get_object('window1')
-        
+
         self.sw = self.builder.get_object('graphscrollwindow')
         self.sw2 = self.builder.get_object('graphtools')
 
@@ -29,8 +31,6 @@ class MainClass():
         self.aentry = self.builder.get_object('aentry')
         self.bentry = self.builder.get_object('bentry')
 
-        self.listbox = self.builder.get_object('method1listbox');
-
         # Use Headerbar for inputs
 
         self.hb = Gtk.HeaderBar()
@@ -39,28 +39,12 @@ class MainClass():
 
         self.window.set_titlebar(self.hb)
 
-        # TODO: Add code that changes the view as per method
+        # Adds widgets that change the view as per method
 
-        self.liststore = Gtk.ListStore(float, float)
-        self.treeview = Gtk.TreeView(model=self.liststore)
-        self.listbox.add(self.treeview)
-
-        self.xrenderer = Gtk.CellRendererText()
-        self.xrenderer.set_property("editable", True)
-        self.xcolumn = Gtk.TreeViewColumn("x-Value", self.xrenderer, text=0)
-        self.xcolumn.set_min_width(100)
-        self.xcolumn.set_alignment(0.5)
-        self.treeview.append_column(self.xcolumn)
-
-        self.yrenderer = Gtk.CellRendererText()
-        self.yrenderer.set_property("editable", True)
-        self.ycolumn = Gtk.TreeViewColumn("y-Value", self.yrenderer, text=1)
-        self.ycolumn.set_min_width(100)
-        self.ycolumn.set_alignment(0.5)
-        self.treeview.append_column(self.ycolumn)
-
-        self.liststore.append([2.35, 2.40])
-        self.liststore.append([3.45, 4.70])
+        self.m1box = MethodDetailsBox()
+        self.m2box = MethodDetailsBox()
+        self.m1revealer.add(self.m1box)
+        self.m2revealer.add(self.m2box)
         
         # TODO: Plot as per the defaults to get started
 
@@ -113,16 +97,24 @@ class MainClass():
         fxs = self.f(xs)
         fxexact = self.ax.plot(xs, fxs, color='black', label='f(x)')
 
+    def plotapprox(self):
+        pass
+#        fxapprox1 = self.ax.plot(xs, self.m1box.fapprox(xs), color='blue', label='Method 1')
+#        fxapprox2 = self.ax.plot(xs, self.m2box.fapprox(xs), color='red', label='Method 1')
+
     def on_params_changed(self, widget):
         # print 'Integrand changed'
         try:
             self.f = eval('lambda x: '+self.fnbox.get_active_text())
             self.a = eval(self.aentry.get_text())
             self.b = eval(self.bentry.get_text())
+            self.m1box.set_exact_function_and_bounds(self.f,self.a,self.b)
+            self.m2box.set_exact_function_and_bounds(self.f,self.a,self.b)
             self.plotexact()
-            self.canvas.draw()
         except:
             pass
+        finally:
+            self.canvas.draw()
 
 mc = MainClass()
 

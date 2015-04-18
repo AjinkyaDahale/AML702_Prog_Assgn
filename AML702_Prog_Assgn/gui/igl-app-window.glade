@@ -63,6 +63,9 @@
                         <items>
                           <item id="none" translatable="yes">None</item>
                           <item id="trapz" translatable="yes">Trapezoidal</item>
+                          <item id="simp13" translatable="yes">Simpson's 1/3</item>
+                          <item id="simp38" translatable="yes">Simpson's 3/8</item>
+                          <item id="glquadr" translatable="yes">Gauss-Legendre Quadrature</item>
                         </items>
                       </object>
                     </child>
@@ -101,6 +104,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
+                            <property name="pack_type">end</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -211,6 +215,7 @@
             <property name="reveal_child">True</property>
             <child>
               <object class="GtkListBox" id="method2listbox">
+                <property name="name">10</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="selection_mode">none</property>
@@ -223,9 +228,14 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="active">0</property>
+                        <property name="button_sensitivity">on</property>
+                        <property name="popup_fixed_width">False</property>
                         <items>
                           <item id="none" translatable="yes">None</item>
                           <item id="trapz" translatable="yes">Trapezoidal</item>
+                          <item id="simp13" translatable="yes">Simpson's 1/3</item>
+                          <item id="simp38" translatable="yes">Simpson's 3/8</item>
+                          <item id="glquadr" translatable="yes">Gauss-Legendre Quadrature</item>
                         </items>
                       </object>
                     </child>
@@ -269,6 +279,7 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
+                                <property name="pack_type">end</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
