@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+import sys, traceback
+
 from gi.repository import Gtk
 
 from matplotlib.figure import Figure
@@ -108,11 +110,11 @@ class MainClass():
             self.f = eval('lambda x: '+self.fnbox.get_active_text())
             self.a = eval(self.aentry.get_text())
             self.b = eval(self.bentry.get_text())
+            self.plotexact()
             self.m1box.set_exact_function_and_bounds(self.f,self.a,self.b)
             self.m2box.set_exact_function_and_bounds(self.f,self.a,self.b)
-            self.plotexact()
         except:
-            pass
+            traceback.print_exc()
         finally:
             self.canvas.draw()
 

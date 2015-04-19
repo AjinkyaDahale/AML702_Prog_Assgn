@@ -4,6 +4,7 @@ from gi.repository import Gtk
 
 from matplotlib.figure import Figure
 from numpy import sin, cos, pi, linspace, log
+import numpy as np
 #Possibly this rendering backend is broken currently
 #from matplotlib.backends.backend_gtk3agg import FigureCanvasGTK3Agg as FigureCanvas
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
@@ -35,7 +36,7 @@ class MethodDetailsBox(Gtk.ListBox):
                   'simp38':'Simpson\'s 3/8',
                   'glquad':'Gauss-Legendre Quadrature'}
 
-        self.fexact = self.fapprox = lambda x: None
+        self.fexact = self.fapprox = lambda x: np.zeros(np.shape(x))
 
         # Adding the ComboBox with the name
         self.mname_combo = Gtk.ComboBoxText.new();
@@ -113,7 +114,7 @@ class MethodDetailsBox(Gtk.ListBox):
         
         # TODO: Calculate approximate integral (Do it before all the view updates so that the answer is ready)
 
-        refresh_data()
+        self.refresh_data()
 
         # Change views as per ID
         self.remove(self.order_row)
@@ -133,24 +134,28 @@ class MethodDetailsBox(Gtk.ListBox):
             self.insert(self.order_row,1)
 
     def refresh_data(self):
+        methodid = self.mname_combo.get_active_id()
+        
         if methodid=='trapz':
             self.result,self.xis,self.fxis,self.wis,self.fapprox \
-                = intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
+                = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
         elif methodid=='simp13':
             self.result,self.xis,self.fxis,self.wis,self.fapprox \
-                = intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
+                = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
         elif methodid=='simp38':
             self.result,self.xis,self.fxis,self.wis,self.fapprox \
-                = intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
+                = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
         elif methodid=='glquad':
             self.result,self.xis,self.fxis,self.wis,self.fapprox \
-                = intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
+                = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
+
+        print(self.fapprox([1,0]))
 
     def set_exact_function_and_bounds(self,fexact,a,b):
         self.fexact = fexact
         self.a = a
         self.b = b
-        self.on_method_changed(None)
+        self.refresh_data()
 
 if __name__ == '__main__':
     window = Gtk.Window()
