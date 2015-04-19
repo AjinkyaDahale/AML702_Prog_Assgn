@@ -37,6 +37,7 @@ class MethodDetailsBox(Gtk.ListBox):
                   'glquad':'Gauss-Legendre Quadrature'}
 
         self.fexact = self.fapprox = lambda x: np.zeros(np.shape(x))
+        self.a = 0; self.b = 1
 
         # Adding the ComboBox with the name
         self.mname_combo = Gtk.ComboBoxText.new();
@@ -60,6 +61,8 @@ class MethodDetailsBox(Gtk.ListBox):
         self.numsteps_sb = Gtk.SpinButton.new_with_range(1,100,1)
         self.numsteps_box.pack_end(self.numsteps_sb,False,False,0)
         self.add(self.numsteps_row)
+        
+        self.numsteps_sb.connect('value-changed',self.on_method_changed)
 
         # Packing up the "Order" row (Useful for GLQ)
         self.order_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
@@ -85,7 +88,11 @@ class MethodDetailsBox(Gtk.ListBox):
         # The tree that shows the points where evaluation is done
         self.liststore = Gtk.ListStore(float, float, float)
         self.points_tree = Gtk.TreeView(model=self.liststore)
-        self.add(self.points_tree)
+        self.points_scroll = Gtk.ScrolledWindow()
+        self.points_scroll.add(self.points_tree)
+        self.points_scroll.set_min_content_height(150)
+        self.points_tree.set_vexpand(True)
+        self.add(self.points_scroll)
 
         self.xrenderer = Gtk.CellRendererText()
         self.xcolumn = Gtk.TreeViewColumn("xi", self.xrenderer, text=0)
@@ -105,8 +112,13 @@ class MethodDetailsBox(Gtk.ListBox):
         self.wcolumn.set_alignment(0.5)
         self.points_tree.append_column(self.wcolumn)
 
+        self.xis = self.fxis = self.wis = []
+ 
+        self.mc = None
+        self.last_methodid = ''
+
         # TODO: How to make it all work fine with the default set to "None"?
-#        self.mname_combo.set_active_id('trapz')
+        # self.mname_combo.set_active_id('trapz')
 
     def on_method_changed(self,widget):
         # TODO: Get the id of the selected method
@@ -116,6 +128,16 @@ class MethodDetailsBox(Gtk.ListBox):
 
         self.refresh_data()
 
+        if self.mc!=None:
+            self.mc.plotexact()
+            # print('Should have been replot')
+
+        self.liststore.clear()
+        for i in zip(self.xis,self.fxis,self.wis): self.liststore.append(i)
+
+        if self.last_methodid == methodid: return
+        else: self.last_methodid = methodid
+        
         # Change views as per ID
         self.remove(self.order_row)
         self.remove(self.stepsize_row)
@@ -149,7 +171,7 @@ class MethodDetailsBox(Gtk.ListBox):
             self.result,self.xis,self.fxis,self.wis,self.fapprox \
                 = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
 
-        print(self.fapprox([1,0]))
+        # print(self.fapprox([1,0]))
 
     def set_exact_function_and_bounds(self,fexact,a,b):
         self.fexact = fexact

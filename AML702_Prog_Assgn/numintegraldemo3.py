@@ -11,7 +11,7 @@ from numpy import sin, cos, pi, linspace, log, exp, floor, piecewise
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
 from matplotlib.backends.backend_gtk3 import NavigationToolbar2GTK3 as NavigationToolbar
 
-from guisetup import MethodDetailsBox
+import guisetup
 
 class MainClass():
     def __init__(self):
@@ -43,10 +43,12 @@ class MainClass():
 
         # Adds widgets that change the view as per method
 
-        self.m1box = MethodDetailsBox()
-        self.m2box = MethodDetailsBox()
+        self.m1box = guisetup.MethodDetailsBox()
+        self.m2box = guisetup.MethodDetailsBox()
         self.m1revealer.add(self.m1box)
         self.m2revealer.add(self.m2box)
+        self.m1box.mc = self
+        self.m2box.mc = self
         
         # TODO: Plot as per the defaults to get started
 
@@ -95,14 +97,16 @@ class MainClass():
     def plotexact(self):
         self.resetplot()
         n = 1000
-        xs = linspace(self.a, self.b, n, endpoint=True)
+        xs = linspace(self.a, self.b, n+1, endpoint=True)
         fxs = self.f(xs)
         fxexact = self.ax.plot(xs, fxs, color='black', label='f(x)')
 
-    def plotapprox(self):
-        pass
-#        fxapprox1 = self.ax.plot(xs, self.m1box.fapprox(xs), color='blue', label='Method 1')
-#        fxapprox2 = self.ax.plot(xs, self.m2box.fapprox(xs), color='red', label='Method 1')
+        #    def plotapprox(self):
+        #        pass
+        # TODO: Make these happen somewhere else. Also, make these hide if the method revealer is hidden
+        fxapprox1 = self.ax.plot(xs, self.m1box.fapprox(xs), color='blue', label='Method 1')
+        fxapprox2 = self.ax.plot(xs, self.m2box.fapprox(xs), color='red', label='Method 1')
+        self.canvas.draw()
 
     def on_params_changed(self, widget):
         # print 'Integrand changed'
@@ -110,13 +114,15 @@ class MainClass():
             self.f = eval('lambda x: '+self.fnbox.get_active_text())
             self.a = eval(self.aentry.get_text())
             self.b = eval(self.bentry.get_text())
-            self.plotexact()
             self.m1box.set_exact_function_and_bounds(self.f,self.a,self.b)
             self.m2box.set_exact_function_and_bounds(self.f,self.a,self.b)
+            self.plotexact()
+        except SyntaxError:
+            pass
         except:
             traceback.print_exc()
-        finally:
-            self.canvas.draw()
+        # finally:
+        #     self.canvas.draw()
 
 mc = MainClass()
 
