@@ -101,13 +101,13 @@ class MainClass():
         n = 1000
         xs = linspace(self.a, self.b, n+1, endpoint=True)
         fxs = self.f(xs)
-        fxexact = self.ax.plot(xs, fxs, color='black', label='f(x)')
+        fxexact = self.ax.plot(xs, fxs, 'k-', label='f(x)')
 
         #    def plotapprox(self):
         #        pass
         # TODO: Make these happen somewhere else. Also, make these hide if the method revealer is hidden
-        fxapprox1 = self.ax.plot(xs, self.m1box.fapprox(xs), color='blue', label='Method 1')
-        fxapprox2 = self.ax.plot(xs, self.m2box.fapprox(xs), color='red', label='Method 1')
+        fxapprox1 = self.ax.plot(xs, self.m1box.fapprox(xs), 'b-', label='Method 1')
+        fxapprox2 = self.ax.plot(xs, self.m2box.fapprox(xs), 'r-', label='Method 1')
         self.canvas.draw()
 
     def on_params_changed(self, widget):

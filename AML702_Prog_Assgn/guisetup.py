@@ -36,7 +36,7 @@ class MethodDetailsBox(Gtk.ListBox):
                   'simp38':'Simpson\'s 3/8',
                   'glquad':'Gauss-Legendre Quadrature'}
 
-        self.fexact = self.fapprox = lambda x: np.zeros(np.shape(x))
+        self.zerofn = self.fexact = self.fapprox = lambda x: np.zeros(np.shape(x))
         self.a = 0; self.b = 1
 
         # Adding the ComboBox with the name
@@ -70,7 +70,7 @@ class MethodDetailsBox(Gtk.ListBox):
         self.order_row.add(self.order_box)
         label1 = Gtk.Label('Order: ', xalign=0)
         self.order_box.pack_start(label1,False,False,0)
-        self.order_sb = Gtk.SpinButton.new_with_range(1,5,1)
+        self.order_sb = Gtk.SpinButton.new_with_range(1,15,1)
         self.order_box.pack_end(self.order_sb,False,False,0)
         self.add(self.order_row)
 
@@ -132,7 +132,7 @@ class MethodDetailsBox(Gtk.ListBox):
         self.last_methodid = ''
 
         # TODO: How to make it all work fine with the default set to "None"?
-        # self.mname_combo.set_active_id('trapz')
+        self.mname_combo.set_active_id('none')
 
     def on_method_changed(self,widget):
         # TODO: Get the id of the selected method
@@ -150,25 +150,38 @@ class MethodDetailsBox(Gtk.ListBox):
         else: self.last_methodid = methodid
         
         # Change views as per ID
-        self.remove(self.order_row)
-        self.remove(self.stepsize_row)
-        self.remove(self.numsteps_row)
-
+        # self.remove(self.order_row)
+        # self.remove(self.stepsize_row)
+        # self.remove(self.numsteps_row)
+        self.order_row.set_visible(False)
+        self.stepsize_row.set_visible(False)
+        self.numsteps_row.set_visible(False)
+        
         if methodid=='trapz':
-            self.insert(self.stepsize_row,1)
-            self.insert(self.numsteps_row,2)
+            self.stepsize_row.set_visible(True)
+            self.numsteps_row.set_visible(True)
+            # self.insert(self.stepsize_row,1)
+            # self.insert(self.numsteps_row,2)
         elif methodid=='simp13':
-            self.insert(self.stepsize_row,1)
-            self.insert(self.numsteps_row,2)
+            self.stepsize_row.set_visible(True)
+            self.numsteps_row.set_visible(True)
+            # self.insert(self.stepsize_row,1)
+            # self.insert(self.numsteps_row,2)
         elif methodid=='simp38':
-            self.insert(self.stepsize_row,1)
-            self.insert(self.numsteps_row,2)
+            self.stepsize_row.set_visible(True)
+            self.numsteps_row.set_visible(True)
+            # self.insert(self.stepsize_row,1)
+            # self.insert(self.numsteps_row,2)
         elif methodid=='glquad':
-            self.insert(self.order_row,1)
+            # self.insert(self.order_row,1)
+            self.order_row.set_visible(True)
 
     def refresh_data(self):
         methodid = self.mname_combo.get_active_id()
         
+        if methodid=='none':
+            self.result,self.xis,self.fxis,self.wis,self.fapprox \
+                = '',[],[],[],self.zerofn
         if methodid=='trapz':
             self.result,self.xis,self.fxis,self.wis,self.fapprox \
                 = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
