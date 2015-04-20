@@ -378,6 +378,7 @@
           <object class="GtkEntry" id="comboboxtext-entry4">
             <property name="can_focus">True</property>
             <property name="activates_default">True</property>
+            <property name="xalign">0.5</property>
           </object>
         </child>
       </object>
@@ -405,6 +406,7 @@
         <property name="can_focus">True</property>
         <property name="width_chars">7</property>
         <property name="text" translatable="yes">-pi</property>
+        <property name="xalign">0.5</property>
         <signal name="changed" handler="on_params_changed" swapped="no"/>
       </object>
       <packing>
@@ -431,6 +433,7 @@
         <property name="can_focus">True</property>
         <property name="width_chars">7</property>
         <property name="text" translatable="yes">pi</property>
+        <property name="xalign">0.5</property>
         <signal name="changed" handler="on_params_changed" swapped="no"/>
       </object>
       <packing>

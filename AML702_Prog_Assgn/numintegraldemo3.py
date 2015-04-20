@@ -2,6 +2,8 @@
 
 import sys, traceback
 
+import numpy as np
+
 from gi.repository import Gtk
 
 from matplotlib.figure import Figure
@@ -117,9 +119,10 @@ class MainClass():
             self.m1box.set_exact_function_and_bounds(self.f,self.a,self.b)
             self.m2box.set_exact_function_and_bounds(self.f,self.a,self.b)
             self.plotexact()
-        except SyntaxError:
+        except SyntaxError,NameError:
             pass
         except:
+            return
             traceback.print_exc()
         # finally:
         #     self.canvas.draw()

@@ -56,7 +56,7 @@ class MethodDetailsBox(Gtk.ListBox):
         self.numsteps_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.numsteps_row = Gtk.ListBoxRow()
         self.numsteps_row.add(self.numsteps_box)
-        label1 = Gtk.Label('Steps', xalign=0)
+        label1 = Gtk.Label('Steps: ', xalign=0)
         self.numsteps_box.pack_start(label1,False,False,0)
         self.numsteps_sb = Gtk.SpinButton.new_with_range(1,100,1)
         self.numsteps_box.pack_end(self.numsteps_sb,False,False,0)
@@ -68,22 +68,36 @@ class MethodDetailsBox(Gtk.ListBox):
         self.order_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.order_row = Gtk.ListBoxRow()
         self.order_row.add(self.order_box)
-        label1 = Gtk.Label('Order', xalign=0)
+        label1 = Gtk.Label('Order: ', xalign=0)
         self.order_box.pack_start(label1,False,False,0)
         self.order_sb = Gtk.SpinButton.new_with_range(1,5,1)
         self.order_box.pack_end(self.order_sb,False,False,0)
         self.add(self.order_row)
-        
+
+        self.order_sb.connect('value-changed',self.on_method_changed)
+       
         # Packing up the "Step Size" row
         self.stepsize_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.stepsize_row = Gtk.ListBoxRow()
         self.stepsize_row.add(self.stepsize_box)
-        label1 = Gtk.Label('Step Size', xalign=0)
+        label1 = Gtk.Label('Step Size: ', xalign=0)
         self.stepsize_box.pack_start(label1,False,False,0)
         self.stepsize_entry = Gtk.Entry()
         self.stepsize_entry.set_alignment(1.0)
         self.stepsize_box.pack_end(self.stepsize_entry,False,False,0)
         self.insert(self.stepsize_row,1)
+
+        # Packing up the "Result" row
+        self.result_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.result_row = Gtk.ListBoxRow()
+        self.result_row.add(self.result_box)
+        label1 = Gtk.Label('Result: ', xalign=0)
+        self.result_box.pack_start(label1,False,False,0)
+        self.result_label = Gtk.Label('', xalign=1.0)
+        self.result_box.pack_end(self.result_label,False,False,0)
+        self.add(self.result_row)
+
+        self.result = 0        
 
         # The tree that shows the points where evaluation is done
         self.liststore = Gtk.ListStore(float, float, float)
@@ -132,9 +146,6 @@ class MethodDetailsBox(Gtk.ListBox):
             self.mc.plotexact()
             # print('Should have been replot')
 
-        self.liststore.clear()
-        for i in zip(self.xis,self.fxis,self.wis): self.liststore.append(i)
-
         if self.last_methodid == methodid: return
         else: self.last_methodid = methodid
         
@@ -163,16 +174,21 @@ class MethodDetailsBox(Gtk.ListBox):
                 = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
         elif methodid=='simp13':
             self.result,self.xis,self.fxis,self.wis,self.fapprox \
-                = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
+                = nigl.intgl_simp13(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
         elif methodid=='simp38':
             self.result,self.xis,self.fxis,self.wis,self.fapprox \
-                = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
+                = nigl.intgl_simp38(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
         elif methodid=='glquad':
             self.result,self.xis,self.fxis,self.wis,self.fapprox \
-                = nigl.intgl_trapz(self.fexact,self.a,self.b,self.numsteps_sb.get_value_as_int())
+                = nigl.intgl_glquad(self.fexact,self.a,self.b,self.order_sb.get_value_as_int())
 
         # print(self.fapprox([1,0]))
 
+        self.liststore.clear()
+        for i in zip(self.xis,self.fxis,self.wis): self.liststore.append(i)
+
+        self.result_label.set_text(str(self.result))
+        
     def set_exact_function_and_bounds(self,fexact,a,b):
         self.fexact = fexact
         self.a = a
