@@ -1,16 +1,71 @@
 #!/usr/bin/python3
 
+# Created by Ajinkya Dahale for AML702 Sem. II 2014-15.
+
+import sys, traceback
+
+import numpy as np
+
 from gi.repository import Gtk
 
 from matplotlib.figure import Figure
-from numpy import sin, cos, pi, linspace, log, exp, floor
+from numpy import sin, cos, pi, linspace, log, exp, floor, piecewise
 #Possibly this rendering backend is broken currently
 #from matplotlib.backends.backend_gtk3agg import FigureCanvasGTK3Agg as FigureCanvas
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
 from matplotlib.backends.backend_gtk3 import NavigationToolbar2GTK3 as NavigationToolbar
 
-# Signals ----------------------------------------------------------------------
-class Signals:
+import guisetup
+
+class MainClass():
+    def __init__(self):
+        # Gets all the objects of interest: windows, list boxes, graphviews etc
+        self.builder = Gtk.Builder()
+        self.builder.add_from_file('gui/igl-app-window.glade')
+        self.builder.connect_signals(self)
+
+        self.window = self.builder.get_object('window1')
+
+        self.sw = self.builder.get_object('graphscrollwindow')
+        self.sw2 = self.builder.get_object('graphtools')
+
+        self.gtbrevealer = self.builder.get_object('graphtoolsrevealer')
+        self.m1revealer = self.builder.get_object('method1revealer')
+        self.m2revealer = self.builder.get_object('method2revealer')
+
+        self.fnbox = self.builder.get_object('functioncbtext')
+        self.aentry = self.builder.get_object('aentry')
+        self.bentry = self.builder.get_object('bentry')
+
+        # Use Headerbar for inputs
+
+        self.hb = Gtk.HeaderBar()
+        self.hb.set_show_close_button(True)
+        self.hb.set_custom_title(self.builder.get_object('titlebox'))
+
+        self.window.set_titlebar(self.hb)
+
+        # Adds widgets that change the view as per method
+
+        self.m1box = guisetup.MethodDetailsBox()
+        self.m2box = guisetup.MethodDetailsBox()
+        self.m1revealer.add(self.m1box)
+        self.m2revealer.add(self.m2box)
+        self.m1box.mc = self
+        self.m2box.mc = self
+        
+        # TODO: Plot as per the defaults to get started
+
+        self.fig = Figure(figsize=(5,5), dpi=80)
+        self.ax = self.fig.add_subplot(111)
+        self.canvas = FigureCanvas(self.fig)
+        self.sw.add_with_viewport(self.canvas)
+
+        self.toolbar = NavigationToolbar(self.canvas, self.window)
+        self.sw2.add_with_viewport(self.toolbar)
+
+        self.on_params_changed(None)
+
     def on_window1_destroy(self, widget):
         Gtk.main_quit()
 
@@ -22,114 +77,65 @@ class Signals:
     # TODO make these change as per the toggle, rather than simply toggling
 
     def toggle_gtbreveal(self, widget):
-        if gtbrevealer.get_reveal_child():
-            gtbrevealer.set_reveal_child(False)
+        if self.gtbrevealer.get_reveal_child():
+            self.gtbrevealer.set_reveal_child(False)
         else:
-            gtbrevealer.set_reveal_child(True)
+            self.gtbrevealer.set_reveal_child(True)
 
     def toggle_m1reveal(self, widget):
-        if m1revealer.get_reveal_child():
-            m1revealer.set_reveal_child(False)
+        if self.m1revealer.get_reveal_child():
+            self.m1revealer.set_reveal_child(False)
         else:
-            m1revealer.set_reveal_child(True)
+            self.m1revealer.set_reveal_child(True)
+        self.plotexact()
             
     def toggle_m2reveal(self, widget):
-        if m2revealer.get_reveal_child():
-            m2revealer.set_reveal_child(False)
+        if self.m2revealer.get_reveal_child():
+            self.m2revealer.set_reveal_child(False)
         else:
-            m2revealer.set_reveal_child(True)
+            self.m2revealer.set_reveal_child(True)
+        self.plotexact()
 
     def resetplot(self):
-        ax.cla()
-        ax.grid(True)
+        self.ax.cla()
+        self.ax.grid(True)
 
     def plotexact(self):
         self.resetplot()
         n = 1000
-        xs = linspace(a, b, n, endpoint=True)
-        fxs = f(xs)
-        fxexact = ax.plot(xs, fxs, color='black', label='f(x)')
+        xs = linspace(self.a, self.b, n+1, endpoint=True)
+        fxs = self.f(xs)
+        fxexact = self.ax.plot(xs, fxs, 'k-', label='f(x)')
+
+        #    def plotapprox(self):
+        #        pass
+        # TODO: Make these happen somewhere else. Also, make these hide if the method revealer is hidden
+        if self.m1revealer.get_reveal_child():
+            fxapprox1 = self.ax.plot(xs, self.m1box.fapprox(xs), 'b-', label='Method 1')
+        if self.m2revealer.get_reveal_child():
+            fxapprox2 = self.ax.plot(xs, self.m2box.fapprox(xs), 'r-', label='Method 2')
+        self.ax.legend()
+        self.canvas.draw()
 
     def on_params_changed(self, widget):
-        global f,a,b
         # print 'Integrand changed'
         try:
-            f = eval('lambda x: '+fnbox.get_active_text())
-            a = eval(aentry.get_text())
-            b = eval(bentry.get_text())
+            self.f = eval('lambda x: '+self.fnbox.get_active_text())
+            self.a = eval(self.aentry.get_text())
+            self.b = eval(self.bentry.get_text())
+            self.m1box.set_exact_function_and_bounds(self.f,self.a,self.b)
+            self.m2box.set_exact_function_and_bounds(self.f,self.a,self.b)
             self.plotexact()
-            canvas.draw()
-        except:
+        except SyntaxError,NameError:
             pass
+        except:
+            return
+            traceback.print_exc()
+        # finally:
+        #     self.canvas.draw()
 
-        
-# Gets all the objects of interest: windows, list boxes, graphviews etc
-builder = Gtk.Builder()
-builder.add_from_file('gui/igl-app-window.glade')
-# builder.add_objects_from_file('gui/igl-app-window.glade', ('titlebox', '') )
-builder.connect_signals(Signals())
+mc = MainClass()
 
-myfirstwindow = builder.get_object('window1')
-sw = builder.get_object('graphscrollwindow')
-sw2 = builder.get_object('graphtools')
-
-gtbrevealer = builder.get_object('graphtoolsrevealer')
-m1revealer = builder.get_object('method1revealer')
-m2revealer = builder.get_object('method2revealer')
-
-fnbox = builder.get_object('functioncbtext')
-aentry = builder.get_object('aentry')
-bentry = builder.get_object('bentry')
-
-# Use Headerbar for inputs
-
-hb = Gtk.HeaderBar()
-hb.set_show_close_button(True)
-hb.set_custom_title(builder.get_object('titlebox'))
-
-myfirstwindow.set_titlebar(hb)
-
-# TODO: Replace all this mess by code for exact solution and the 2 methods to compare.
-
-fig = Figure(figsize=(5,5), dpi=80)
-ax = fig.add_subplot(111)
-
-f = lambda x: sin(x); a,b = -pi,pi
-
-n = 1000
-xs = linspace(a, b, n, endpoint=True)
-# xcos = linspace(-pi, pi, n, endpoint=True)
-fxs = f(xs)
-# ycos = cos(xcos)
-
-fxexact = ax.plot(xs, fxs, color='black', label='f(x)')
-m1approx = ax.plot(xs[::100], fxs[::100], color='black', label='Approx 1', linestyle='--')
-
-ax.set_xlim(a,b)
-ax.set_ylim(min(fxs),max(fxs))
-
-# ax.fill_between(xs, 0, fxs, (fxs - 1) > -1, color='blue', alpha=.3)
-# ax.fill_between(xs, 0, fxs, (fxs - 1) < -1, color='red',  alpha=.3)
-# ax.fill_between(xcos, 0, ycos, (ycos - 1) > -1, color='blue', alpha=.3)
-# ax.fill_between(xcos, 0, ycos, (ycos - 1) < -1, color='red',  alpha=.3)
-
-ax.legend(loc='upper left')
-
-ax = fig.gca()
-ax.spines['right'].set_color('none')
-ax.spines['top'].set_color('none')
-ax.xaxis.set_ticks_position('bottom')
-# ax.spines['bottom'].set_position(('data',0))
-ax.yaxis.set_ticks_position('left')
-# ax.spines['left'].set_position(('data',0))
-
-fig.tight_layout()
-
-canvas = FigureCanvas(fig)
-sw.add_with_viewport(canvas)
-
-toolbar = NavigationToolbar(canvas, myfirstwindow)
-sw2.add_with_viewport(toolbar)
-
-myfirstwindow.show_all()
+mc.window.connect("delete-event", Gtk.main_quit)
+mc.window.show_all()
 Gtk.main()

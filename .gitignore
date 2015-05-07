@@ -1,3 +1,9 @@
+/AML702_Prog_Assgn/gui/interp-app-window.glade~
+/AML702_Prog_Assgn/Readme.txt~
+/AML702_Prog_Assgn/Readme.markdown~
+/AML702_Prog_Assgn/Integral_demo_presentation.pdf
+/AML702_Prog_Assgn/Integral_demo_presentation.odp
+/AML702_Prog_Assgn_Ajinkya_Dahale.zip
 /AML702_Prog_Assgn/gui/#igl-app-method-details.glade#
 /AML702_Prog_Assgn/gui/__init__.pyc
 /AML702_Prog_Assgn/gui/guisetup.pyc
@@ -23,3 +29,6 @@
 /guitrialgtk.py~
 /firstguiglade.glade~
 /empty-window-glade.glade~
+/*.pyc
+/#*#
+/*~

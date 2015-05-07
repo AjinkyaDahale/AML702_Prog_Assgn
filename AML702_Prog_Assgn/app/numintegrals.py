@@ -1,4 +1,7 @@
 #/usr/bin/python3
+
+# Created by Ajinkya Dahale for AML702 Sem. II 2014-15.
+
 from __future__ import division
 import numpy as np
 import scipy.integrate as spintegrate

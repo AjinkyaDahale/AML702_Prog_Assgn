@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# Created by Ajinkya Dahale for AML702 Sem. II 2014-15.
+
 from gi.repository import Gtk
 
 from matplotlib.figure import Figure
@@ -82,8 +84,8 @@ class MethodDetailsBox(Gtk.ListBox):
         self.stepsize_row.add(self.stepsize_box)
         label1 = Gtk.Label('Step Size: ', xalign=0)
         self.stepsize_box.pack_start(label1,False,False,0)
-        self.stepsize_entry = Gtk.Entry()
-        self.stepsize_entry.set_alignment(1.0)
+        self.stepsize_entry = Gtk.Label('',xalign = 1.0)
+        # self.stepsize_entry.set_alignment(1.0)
         self.stepsize_box.pack_end(self.stepsize_entry,False,False,0)
         self.insert(self.stepsize_row,1)
 
@@ -201,6 +203,7 @@ class MethodDetailsBox(Gtk.ListBox):
         for i in zip(self.xis,self.fxis,self.wis): self.liststore.append(i)
 
         self.result_label.set_text(str(self.result))
+        self.stepsize_entry.set_text(str((self.b-self.a)/self.numsteps_sb.get_value_as_int()))
         
     def set_exact_function_and_bounds(self,fexact,a,b):
         self.fexact = fexact
